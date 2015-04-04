@@ -63,8 +63,7 @@ namespace Microsoft.Samples.Kinect.DepthBasics
         private byte[] depthPixels = null;
 
         /// <summary>
-        /// このフィールド値はアプリが適切に動作しているものかを
-        /// 表示するための情報を扱います。
+        /// アプリが適切に動作しているものかを表示するための情報を扱います。
         /// </summary>
         private string statusText = null;
 

@@ -21,63 +21,68 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
     using WindowsPreview.Kinect;
 
     /// <summary>
-    /// Main page for the Discrete Gesture Basics sample
+    /// Main page のロジックの部分です。    
     /// </summary>
     public sealed partial class MainPage : Page, INotifyPropertyChanged
     {
-        /// <summary> Resource loader for string resources </summary>
+        /// <summary> リソースをロードします。 </summary>
         private ResourceLoader resourceLoader = ResourceLoader.GetForCurrentView("Resources");
 
-        /// <summary> Active Kinect sensor </summary>
+        /// <summary> Kinect センサー本体を扱うためのフィールドです。 </summary>
         private KinectSensor kinectSensor = null;
 
-        /// <summary> Array for the bodies (Kinect will track up to 6 people simultaneously) </summary>
+        /// <summary> 各人の情報を格納する配列のフィールドです。 (Kinect は、最大6人まで同時に情報を採取できます。) </summary>
         private Body[] bodies = null;
 
-        /// <summary> Reader for body frames </summary>
+        /// <summary> 各フレームにおいて人の情報が格納されるフィールドです。</summary>
         private BodyFrameReader bodyFrameReader = null;
 
-        /// <summary> Current status text to display </summary>
+        /// <summary> アプリが適切に動作しているものかを表示するための情報を扱います。 </summary>
         private string statusText = null;
 
-        /// <summary> KinectBodyView object which handles drawing the Kinect bodies to a View box in the UI </summary>
+        /// <summary> KinectBodyView オブジェクトは、UI 上の画面左に表示される ViewBox を描画する際に必要なオブジェクトです。 </summary>
         private KinectBodyView kinectBodyView = null;
 
-        /// <summary> List of gesture detectors, there will be one detector created for each potential body (max of 6) </summary>
+        /// <summary>  GestureDetector のリストでです。
+        /// 1人の情報につき、GestureDetector が存在します。
+        /// このクラスにより、各人の姿勢の状態を判定します。(最大 6 つとなります。) </summary>
         private List<GestureDetector> gestureDetectorList = null;
 
-        /// <summary>
-        /// Initializes a new instance of the MainPage class
-        /// </summary>
         public MainPage()
         {
-            // initialize the MainPage
+            // MainPage を動作させるための必要な初期化を実施します。
             this.InitializeComponent();
 
-            // only one sensor is currently supported
+            // Kinect センサーのオブジェクトを取得します。
+            // このサンプルコードでは、一つまでの Kinect センサーをサポートしています。
             this.kinectSensor = KinectSensor.GetDefault();
 
-            // set IsAvailableChanged event notifier
+            // Kinect センサーについて (USB 接続が切れてしまった等) 変化した場合に
+            // "Sensor_IsAvailableChanged" の処理が実行されるようにイベントハンドラを登録します。
             this.kinectSensor.IsAvailableChanged += this.Sensor_IsAvailableChanged;
 
-            // open the sensor
+            // Kinect センサーを起動します。
             this.kinectSensor.Open();
 
-            // set the status text
+            // Kinect センサーが適切に動作しているかを表示します。(アプリの画面左下に表示されます。)
             this.StatusText = this.kinectSensor.IsAvailable ? this.resourceLoader.GetString("RunningStatusText")
                                                             : this.resourceLoader.GetString("NoSensorStatusText");
 
-            // open the reader for the body frames
+            // 人の情報が含まれたフレームを、読み込むためのオブジェクトを bodyFrameReader に格納します。
             this.bodyFrameReader = this.kinectSensor.BodyFrameSource.OpenReader();
+
+            // フレームが到着したことを示すイベント FrameArrived が発生した際に
+            // Reader_BodyFrameArrived の処理が実行されるようにイベントハンドラを登録します。 
             this.bodyFrameReader.FrameArrived += this.Reader_BodyFrameArrived;
 
-            // initialize the BodyViewer object for displaying tracked bodies in the UI
+            // アプリの画面左に表示されている人の情報を表示させるための UI BodyViewer オブジェクトを初期化します。
             this.kinectBodyView = new KinectBodyView(this.kinectSensor, this.bodyDisplayGrid);
 
-            // initialize the gesture detection objects for our gestures
+            // 各人のジェスチャーを取得するためのオブジェクトである、GestureDetecter のリストを初期化します。
             this.gestureDetectorList = new List<GestureDetector>();
 
-            // create a gesture detector for each body (6 bodies => 6 detectors) and create content controls to display results in the UI
+            // 各人毎に、GestureDetecte オブジェクトを作成、紐づけを実施します。
+            // また、UI に表示を行うための、GestureResultView のオブジェクトの作成、設定もこの部分で行います。
             int col0Row = 0;
             int col1Row = 0;
             int maxBodies = this.kinectSensor.BodyFrameSource.BodyCount;
@@ -87,21 +92,23 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                 GestureDetector detector = new GestureDetector(this.kinectSensor, result);
                 this.gestureDetectorList.Add(detector);
 
-                // split gesture results across the first two columns of the content grid
+
+                // 画面左に 3 行 * 2 列 の合計 6 つの グリッドを作成します。
+                // 各グリッドでは、人のジェスチャーの結果を表示します。
                 ContentControl contentControl = new ContentControl();
                 contentControl.ContentTemplate = this.GestureResultDataTemplate;
                 contentControl.Content = this.gestureDetectorList[i].GestureResultView;
 
                 if (i % 2 == 0)
                 {
-                    // Gesture results for bodies: 0, 2, 4
+                    //6 つのグリッドのうち、左側に表示されるグリッドを定義します。
                     Grid.SetColumn(contentControl, 0);
                     Grid.SetRow(contentControl, col0Row);
                     ++col0Row;
                 }
                 else
                 {
-                    // Gesture results for bodies: 1, 3, 5
+                    //6 つのグリッドのうち、右側に表示されるグリッドを定義します。
                     Grid.SetColumn(contentControl, 1);
                     Grid.SetRow(contentControl, col1Row);
                     ++col1Row;
@@ -110,18 +117,18 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                 this.contentGrid.Children.Add(contentControl);
             }
 
-            // set our data context objects for display in UI
+            // UI にデータをバインドするための、DataContext の設定を行います。
             this.bodyDisplayGrid.DataContext = this.kinectBodyView.DisplayGrid;
             this.DataContext = this;
         }
 
         /// <summary>
-        /// INotifyPropertyChangedPropertyChanged event to allow window controls to bind to changeable data
+        /// INotifyPropertyChangedPropertyChanged はデータの設定変更を UI に通知するための、イベントです。
         /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
         /// <summary>
-        /// Gets or sets the current status text to display
+        /// 現在の Kinect センサーの状態を適切に取得します。
         /// </summary>
         public string StatusText
         {
@@ -136,7 +143,6 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                 {
                     this.statusText = value;
 
-                    // notify any bound elements that the text has changed
                     if (this.PropertyChanged != null)
                     {
                         this.PropertyChanged(this, new PropertyChangedEventArgs("StatusText"));
@@ -146,7 +152,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         }
 
         /// <summary>
-        /// Execute shutdown tasks
+        /// MainPage がアンロードされた時の処理です。
         /// </summary>
         /// <param name="sender">object sending the event</param>
         /// <param name="e">event arguments</param>
@@ -154,7 +160,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         {
             if (this.bodyFrameReader != null)
             {
-                // BodyFrameReader is IDisposable
+                // BodyFrameReader オブジェクトの解放処理を実施します。
                 this.bodyFrameReader.FrameArrived -= this.Reader_BodyFrameArrived;
                 this.bodyFrameReader.Dispose();
                 this.bodyFrameReader = null;
@@ -162,7 +168,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
 
             if (this.gestureDetectorList != null)
             {
-                // The GestureDetector contains disposable members (VisualGestureBuilderFrameReader)
+                // 各 GestureDetector オブジェクトの解放処理を実施します。
                 foreach (GestureDetector detector in this.gestureDetectorList)
                 {
                     detector.Dispose();
@@ -172,6 +178,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                 this.gestureDetectorList = null;
             }
 
+            //Kinect センサーのオブジェクトの解放処理を行います。
             if (this.kinectSensor != null)
             {
                 this.kinectSensor.IsAvailableChanged -= this.Sensor_IsAvailableChanged;
@@ -181,13 +188,13 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         }
 
         /// <summary>
-        /// Handles the event when the sensor becomes unavailable (e.g. paused, closed, unplugged).
+        /// Kinect センサーが、利用不可能になった時に呼び出されるイベントハンドラです。
         /// </summary>
         /// <param name="sender">object sending the event</param>
         /// <param name="e">event arguments</param>
         private void Sensor_IsAvailableChanged(object sender, IsAvailableChangedEventArgs e)
         {
-            // on failure, set the status text
+            // Kinect センサーが利用可能かどうか、判定します。
             if (!this.kinectSensor.IsAvailable)
             {
                 this.StatusText = this.resourceLoader.GetString("SensorNotAvailableStatusText");
@@ -199,7 +206,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         }
 
         /// <summary>
-        /// Handles the body frame data arriving from the sensor and updates the associated gesture detector object for each body
+        /// フレームが、Kinect センサーから送られてきた際に呼び出されるイベントハンドラです。
         /// </summary>
         /// <param name="sender">object sending the event</param>
         /// <param name="e">event arguments</param>
@@ -213,13 +220,12 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                 {
                     if (this.bodies == null)
                     {
-                        // creates an array of 6 bodies, which is the max number of bodies that Kinect can track simultaneously
+                        // 各人の情報が入る配列を定義する。最大同時に 6 人まで検知できるので、要素数 6 の配列を定義する。
                         this.bodies = new Body[bodyFrame.BodyCount];
                     }
 
-                    // The first time GetAndRefreshBodyData is called, Kinect will allocate each Body in the array.
-                    // As long as those body objects are not disposed and not set to null in the array,
-                    // those body objects will be re-used.
+                    // 最初に GetAndRefreshBodyData が呼ばれた時に、Kinect は各人の情報を配列に格納します。
+                    // 各人のオブジェクトが解放され、null 値が設定されない限り、オブジェクトは再利用されます。
                     bodyFrame.GetAndRefreshBodyData(this.bodies);
                     dataReceived = true;
                 }
@@ -227,12 +233,15 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
 
             if (dataReceived)
             {
-                // visualize the new body data
+                // 人のデータを可視化します。
+                // 1人以上の人の情報が格納されていたら、人のオブジェクトに含まれている情報を更新し、画面に描画します。
+                // これまでに追跡されていた人が、追跡されなくなった場合、画面上に描画を実行しないようにします。
                 this.kinectBodyView.UpdateBodyFrame(this.kinectSensor, this.bodies);
 
-                // we may have lost/acquired bodies, so update the corresponding gesture detectors
+                // もし人の情報を失ったり、検知した場合に、動作を検知する GestureDetector の紐づけを行います。
                 if (this.bodies != null)
                 {
+                    // 現在存在するすべての人のオブジェクトに対して GestureDetector の紐づけを確認します。
                     // loop through all bodies to see if any of the gesture detectors need to be updated
                     int maxBodies = this.kinectSensor.BodyFrameSource.BodyCount;
                     for (int i = 0; i < maxBodies; ++i)
@@ -240,13 +249,14 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                         Body body = this.bodies[i];
                         ulong trackingId = body.TrackingId;
 
+                        // もし、TrackId が、変わっている場合、GestureDetector の TrackId も変更します。
                         // if the current body TrackingId changed, update the corresponding gesture detector with the new value
                         if (trackingId != this.gestureDetectorList[i].TrackingId)
                         {
                             this.gestureDetectorList[i].TrackingId = trackingId;
 
-                            // if the current body is tracked, unpause its detector to get VisualGestureBuilderFrameArrived events
-                            // if the current body is not tracked, pause its detector so we don't waste resources trying to get invalid gesture results
+                            // 現在チェックしている人が、追跡されている状態なら、GestureDetector の IsPaused の値に True を格納し、処理を続行する。
+                            // 現在チェックしている人が、追跡されていない状態ならば、GestureDetector が不要なので、IsPaused に False を格納し処理を停止する。 
                             this.gestureDetectorList[i].IsPaused = trackingId == 0;
                         }
                     }
