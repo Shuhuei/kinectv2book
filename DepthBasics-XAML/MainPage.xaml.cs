@@ -16,18 +16,15 @@ using WindowsPreview.Kinect;
 namespace Microsoft.Samples.Kinect.DepthBasics
 {
     /// <summary>
-    /// Main page for sample
+    /// MainPage のロジックの部分です。
     /// </summary>
     public sealed partial class MainPage : Page, INotifyPropertyChanged
     {
         /// <summary>
-        /// Map depth range to byte range
+        /// 深度データを、バイトデータに変換する際に使用します。
         /// </summary>
         private const int MapDepthToByte = 8000 / 256;
 
-        /// <summary>
-        /// Resource loader for string resources
-        /// </summary>
 #if WIN81ORLATER
         private ResourceLoader resourceLoader = ResourceLoader.GetForCurrentView("Resources");
 #else
@@ -36,88 +33,89 @@ namespace Microsoft.Samples.Kinect.DepthBasics
 
 
         /// <summary>
-        /// Size of the RGB pixel in the bitmap
+        /// ビットマップ形式のデータを格納する際、インデックスに使用します。
         /// </summary>
         private readonly int cbytesPerPixel = 4;
 
         /// <summary>
-        /// Active Kinect sensor
+        ///  Kinect センサー本体を扱うためのフィールドです。
         /// </summary>
         private KinectSensor kinectSensor = null;
 
         /// <summary>
-        /// Reader for depth frames
+        /// 深度センサーから届くフレームを扱うためのフィールドです。
         /// </summary>
         private DepthFrameReader depthFrameReader = null;
 
         /// <summary>
-        /// Bitmap to display
+        /// ビットマップ形式のデータを画面上に表示させるためのフィールドです。
         /// </summary>
         private WriteableBitmap bitmap = null;
 
         /// <summary>
-        /// Intermediate storage for receiving frame data from the sensor
+        /// Kinect センサーが取得した、フレームの深度データが格納されるフィールドです。
         /// </summary>
         private ushort[] depthFrameData = null;
 
         /// <summary>
-        /// Intermediate storage for frame data converted to color
+        /// 深度フレームの情報を RGB に変換されたデータが格納されるフィールドです。
         /// </summary>
         private byte[] depthPixels = null;
 
         /// <summary>
-        /// Current status text to display
+        /// このフィールド値はアプリが適切に動作しているものかを
+        /// 表示するための情報を扱います。
         /// </summary>
         private string statusText = null;
 
-        /// <summary>
-        /// Initializes a new instance of the MainPage class.
-        /// </summary>
         public MainPage()
         {
-            // get the kinectSensor object
+            // Kinect センサー V2 ののオブジェクトを取得します。
             this.kinectSensor = KinectSensor.GetDefault();
 
-            // get the depthFrameDescription from the DepthFrameSource
+            // 深度フレームに関する情報が格納されたオブジェクトを取得します。
             FrameDescription depthFrameDescription = this.kinectSensor.DepthFrameSource.FrameDescription;
 
-            // open the reader for the depth frames
+            // 深度フレームを読み込むための Reader を開きます。
             this.depthFrameReader = this.kinectSensor.DepthFrameSource.OpenReader();
 
-            // wire handler for frame arrival
+            // 深度情報が格納されたフレームが到着したことを示すイベント "FrameArrived" が発生した際に
+            // "Reader_DepthFrameArrived" の処理が実行されるようにイベントハンドラを登録します。
             this.depthFrameReader.FrameArrived += this.Reader_DepthFrameArrived;
 
-            // allocate space to put the pixels being received and converted
+            // 512 × 424 サイズの配列を定義します。
             this.depthFrameData = new ushort[depthFrameDescription.Width * depthFrameDescription.Height];
             this.depthPixels = new byte[depthFrameDescription.Width * depthFrameDescription.Height * this.cbytesPerPixel];
 
-            // create the bitmap to display
+            // ディスプレイに出力するための ビットマップデータを出力します。
             this.bitmap = new WriteableBitmap(depthFrameDescription.Width, depthFrameDescription.Height);//, 96.0, 96.0, PixelFormats.Bgr32, null);
 
-            // set IsAvailableChanged event notifier
+            // Kinect センサーについて (USB 接続が切れてしまった等) 変化した場合に
+            // "Sensor_IsAvailableChanged" の処理が実行されるようにイベントハンドラを登録します。
             this.kinectSensor.IsAvailableChanged += this.Sensor_IsAvailableChanged;
 
-            // open the sensor
+
+            // Kinect Sensor の処理を開始します。
             this.kinectSensor.Open();
 
-            // set the status text
+            // Kinect センサーが適切に動作しているものかを表示します。(アプリの画面左下に表示されます。)
             this.StatusText = this.kinectSensor.IsAvailable ? resourceLoader.GetString("RunningStatusText")
                                                             : resourceLoader.GetString("NoSensorStatusText");
 
-            // use the window object as the view model in this simple example
+            // View Model として、扱えるように DataContext に MainPage クラスを指定します。
             this.DataContext = this;
 
-            // initialize the components (controls) of the window
+            // アプリの起動に必要な初期化処理を実行します。
             this.InitializeComponent();
         }
 
         /// <summary>
-        /// INotifyPropertyChangedPropertyChanged event to allow window controls to bind to changeable data.
+        /// INotifyPropertyChangedPropertyChanged を用いて、プロパティの変更を画面コントロールに通知します。 
         /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
         /// <summary>
-        /// Gets or sets the current status text to display
+        /// 現在の Kinect センサーの状態を表示するためのプロパティです。
         /// </summary>
         public string StatusText
         {
@@ -131,8 +129,6 @@ namespace Microsoft.Samples.Kinect.DepthBasics
                 if (this.statusText != value)
                 {
                     this.statusText = value;
-
-                    // notify any bound elements that the text has changed
                     if (this.PropertyChanged != null)
                     {
                         this.PropertyChanged(this, new PropertyChangedEventArgs("StatusText"));
@@ -142,7 +138,7 @@ namespace Microsoft.Samples.Kinect.DepthBasics
         }
 
         /// <summary>
-        /// Execute shutdown tasks.
+        /// MainPage のシャットダウンの処理です。
         /// </summary>
         /// <param name="sender">object sending the event</param>
         /// <param name="e">event arguments</param>
@@ -150,20 +146,21 @@ namespace Microsoft.Samples.Kinect.DepthBasics
         {
             if (this.depthFrameReader != null)
             {
-                // DepthFrameReder is IDisposable
+                // DepthFrameReader の オブジェクトを解放します。
                 this.depthFrameReader.Dispose();
                 this.depthFrameReader = null;
             }
 
             if (this.kinectSensor != null)
             {
+                // Kinect センサーの処理を終了します。
                 this.kinectSensor.Close();
                 this.kinectSensor = null;
             }
         }
 
         /// <summary>
-        /// Handles the depth frame data arriving from the sensor.
+        /// 深度センサーからフレームが到着した際に呼びされるイベントハンドラーです。
         /// </summary>
         /// <param name="sender">object sending the event</param>
         /// <param name="e">event arguments</param>
@@ -174,27 +171,32 @@ namespace Microsoft.Samples.Kinect.DepthBasics
 
             bool depthFrameProcessed = false;
             
-            // DepthFrame is IDisposable
             using (DepthFrame depthFrame = e.FrameReference.AcquireFrame())
             {
+                // 到着したフレームが存在する場合に処理を継続します。
                 if (depthFrame != null)
                 {
+                    // 深度フレームを読み込むための Reader を開きます。                    
                     FrameDescription depthFrameDescription = depthFrame.FrameDescription;
 
-                    // verify data and write the new depth frame data to the display bitmap
+                    // 到着した深度フレームのサイズ縦横のサイズと、用意した depthFrameDescription が持つ縦横比が一致しているか確認します。
                     if (((depthFrameDescription.Width * depthFrameDescription.Height) == this.depthFrameData.Length) &&
                         (depthFrameDescription.Width == this.bitmap.PixelWidth) && (depthFrameDescription.Height == this.bitmap.PixelHeight))
                     {
-                        // Copy the pixel data from the image to a temporary array
+
+                        // 深度フレームのデータを、コピーし、配列に格納します。
                         depthFrame.CopyFrameDataToArray(this.depthFrameData);
 
-                        minDepth = depthFrame.DepthMinReliableDistance;
+                        // 深度センサーの観測可能範囲は、0.5 - 4.5 mです。
+                        // そのため、MinDepth は、500 (mm)
+                        // MaxValue は、65535 (mm)としています。
+                        // MaxValue に対して、4.5 m より十分大きな値が格納されているのでは、Kinect の深度取得可能範囲を
+                        // 包含できるようにするためです。
 
-                        // Note: In order to see the full range of depth (including the less reliable far field depth)
-                        // we are setting maxDepth to the extreme potential depth threshold
+                        minDepth = depthFrame.DepthMinReliableDistance;
                         maxDepth = ushort.MaxValue;
 
-                        // If you wish to filter by reliable depth distance, uncomment the following line:
+                        // もし Kinect センサーで定義されている、深度情報の取得可能な区間を格納したい場合は下記のコメントを外して下さい。
                         //// maxDepth = depthFrame.DepthMaxReliableDistance
                         
                         depthFrameProcessed = true;
@@ -202,47 +204,47 @@ namespace Microsoft.Samples.Kinect.DepthBasics
                 }
             }
 
-            // we got a frame, convert and render
+            // 深度情報を元に描画処理を実行します。
             if (depthFrameProcessed)
             {
+                //深度情報を、RGB 値に変換します。
                 ConvertDepthData(minDepth, maxDepth);
 
+                //変換したデータを画面に描画します。
                 RenderDepthPixels(this.depthPixels);
             }
         }
 
         /// <summary>
-        /// Converts depth to RGB.
+        /// フレーム内の深度情報を RGB 値に変換します。
         /// </summary>
         /// <param name="frame"></param>
         private void ConvertDepthData(ushort minDepth, ushort maxDepth)
         {
             int colorPixelIndex = 0;
+
+            // フレーム内に存在する 512 * 424 ピクセルの各深度データに対して、RGB 値に変換する処理を実行します。 
             for (int i = 0; i < this.depthFrameData.Length; ++i)
             {
-                // Get the depth for this pixel
                 ushort depth = this.depthFrameData[i];
 
-                // To convert to a byte, we're mapping the depth value to the byte range.
-                // Values outside the reliable depth range are mapped to 0 (black).
+                // 深度情報を、RGB 値に変換できるように補正処理します。
                 byte intensity = (byte)(depth >= minDepth && depth <= maxDepth ? (depth / MapDepthToByte) : 0);
 
-                // Write out blue byte
+                //上記で求めた、intensity の値を、下記に RGB 値として入力します。
+
                 this.depthPixels[colorPixelIndex++] = intensity;
 
-                // Write out green byte
                 this.depthPixels[colorPixelIndex++] = intensity;
 
-                // Write out red byte                        
                 this.depthPixels[colorPixelIndex++] = intensity;
 
-                // Write out alpha byte                        
                 this.depthPixels[colorPixelIndex++] = 255;
             }
         }
 
         /// <summary>
-        /// Renders color pixels into the writeableBitmap.
+        /// 画面への描画処理を実行します。
         /// </summary>
         /// <param name="pixels">pixel data</param>
         private void RenderDepthPixels(byte[] pixels)
@@ -253,13 +255,12 @@ namespace Microsoft.Samples.Kinect.DepthBasics
         }
 
         /// <summary>
-        /// Handles the event which the sensor becomes unavailable (E.g. paused, closed, unplugged).
+        /// Kinect センサーの状態が変わったときに呼び出されます。
         /// </summary>
         /// <param name="sender">object sending the event</param>
         /// <param name="e">event arguments</param>
         private void Sensor_IsAvailableChanged(object sender, IsAvailableChangedEventArgs e)
         {
-            // on failure, set the status text
             this.StatusText = this.kinectSensor.IsAvailable ? resourceLoader.GetString("RunningStatusText")
                                                             : resourceLoader.GetString("SensorNotAvailableStatusText");
         }
