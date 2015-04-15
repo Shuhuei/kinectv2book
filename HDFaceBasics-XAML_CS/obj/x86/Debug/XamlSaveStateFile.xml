@@ -1,0 +1,10 @@
+<XamlCompilerSaveState>
+  <ReferenceAssemblyList>
+    <LocalAssembly PathName="c:\users\shuhei\desktop\kinectv2book\hdfacebasics-xaml_cs\obj\x86\debug\intermediatexaml\hdfacebasics-xaml_cs.exe" HashGuid="3c6ed2c9-e916-9ee5-5be9-a0cf4e3183c9" />
+    <ReferenceAssembly PathName="c:\program files (x86)\microsoft sdks\windows\v8.1\extensionsdks\microsoft.kinect.face\2.0\references\commonconfiguration\neutral\microsoft.kinect.face.winmd" HashGuid="a37c50e9-c725-60ab-ab30-63aadc22fec1" />
+    <ReferenceAssembly PathName="c:\program files (x86)\microsoft sdks\windows\v8.1\extensionsdks\microsoft.vclibs\12.0\references\commonconfiguration\neutral\platform.winmd" HashGuid="58b6b6d1-928e-9908-9804-eb460e5e101b" />
+    <ReferenceAssembly PathName="c:\program files (x86)\microsoft sdks\windows\v8.1\extensionsdks\windowspreview.kinect\2.0\references\commonconfiguration\neutral\windowspreview.data.winmd" HashGuid="bec3b354-5b74-1234-191f-25a435755c0a" />
+    <ReferenceAssembly PathName="c:\program files (x86)\microsoft sdks\windows\v8.1\extensionsdks\windowspreview.kinect\2.0\references\commonconfiguration\neutral\windowspreview.kinect.winmd" HashGuid="d7412096-a3c7-9108-a946-0ff0cc614d3f" />
+    <ReferenceAssembly PathName="c:\users\shuhei\desktop\kinectv2book\hdfacebasics-xaml_cs\debug\hdfacevisualizer\hdfacevisualizer.winmd" HashGuid="50b1651e-4568-db23-6261-050594ff21c0" />
+  </ReferenceAssemblyList>
+</XamlCompilerSaveState>

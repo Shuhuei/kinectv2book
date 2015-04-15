@@ -26,7 +26,7 @@
   <ItemGroup>
     <AppxPackagedFile Include="C:\Users\Shuhei\Desktop\kinectv2book\DepthBasics-XAML\bin\x64\Debug\DepthBasics-XAML.exe">
       <PackagePath>DepthBasics-XAML.exe</PackagePath>
-      <Modified>2015-04-04T09:33:00.206</Modified>
+      <Modified>2015-04-15T12:20:57.696</Modified>
     </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Shuhei\Desktop\kinectv2book\DepthBasics-XAML\Assets\Logo.png">
       <PackagePath>Assets\Logo.png</PackagePath>

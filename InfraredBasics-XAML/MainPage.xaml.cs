@@ -17,55 +17,48 @@ using WindowsPreview.Kinect;
 namespace Microsoft.Samples.Kinect.InfraredBasics
 {
     /// <summary>
-    /// Main page for sample
-    /// </summary>
+    /// Main page のロジックの部分です。
+    /// </summary> 
     public sealed partial class MainPage : Page, INotifyPropertyChanged
     {
         /// <summary>
-        /// InfraredSourceValueMaximum is the highest value that can be returned in the InfraredFrame.
-        /// It is cast to a float for readability in the visualization code.
+        /// InfraredSourceValueMaximum は、InfraredFrame (赤外線で取得した情報が含まれるフレーム。以下赤外線フレーム) のピクセルの輝度の上限値が入ります。
+        /// 可読性を高めるため、float 型へのキャストが可能です。
         /// </summary>
         private const float InfraredSourceValueMaximum = (float)ushort.MaxValue;
 
         /// <summary>
-        /// The InfraredOutputValueMinimum value is used to set the lower limit, post processing, of the
-        /// infrared data that we will render.
-        /// Increasing or decreasing this value sets a brightness "wall" either closer or further away.
+        /// InfraredOutputValueMinimum は、赤外線フレームのピクセルの下限値が入ります。
         /// </summary>
         private const float InfraredOutputValueMinimum = 0.01f;
 
         /// <summary>
-        /// The InfraredOutputValueMaximum value is the upper limit, post processing, of the
-        /// infrared data that we will render.
+        /// InfraredOutputValueMaximum は、赤外線データを描画用のデータとして処理してからの上限値です。
         /// </summary>
         private const float InfraredOutputValueMaximum = 1.0f;
 
         /// <summary>
-        /// The InfraredSceneValueAverage value specifies the average infrared value of the scene.
-        /// This value was selected by analyzing the average pixel intensity for a given scene.
-        /// Depending on the visualization requirements for a given application, this value can be
-        /// hard coded, as was done here, or calculated by averaging the intensity for each pixel prior
-        /// to rendering.
+        /// InfraredSceneValueAverage は、赤外線データが保持している値の平均値が入っています。
+        /// この値は、与えられたフレームの各ピクセルの輝度の平均を格納します。
+        /// 可視化する際の条件によりますが、この値は、定数として格納するか、
+        /// 描画する際の輝度の平均値を計算することで得られます。
         /// </summary>
         private const float InfraredSceneValueAverage = 0.08f;
 
         /// <summary>
-        /// The InfraredSceneStandardDeviations value specifies the number of standard deviations
-        /// to apply to InfraredSceneValueAverage. This value was selected by analyzing data
-        /// from a given scene.
-        /// Depending on the visualization requirements for a given application, this value can be
-        /// hard coded, as was done here, or calculated at runtime.
+        /// InfraredSceneStandardDeviations は、InfraredSceneValueAverage を元に算出された標準偏差となります。
+        /// この値は与えられた条件から、データを解析して算出されます。
+        /// InfraredSceneValueAverage と同じくアプリケーションの要件に依存しますが、
+        /// この値は定数としてハードコードするか実行時に計算させるこにより、得られます。
         /// </summary>
         private const float InfraredSceneStandardDeviations = 3.0f;
 
         /// <summary>
-        /// Size of the RGB pixel in the bitmap
+        /// ビットマップ形式のデータを格納する際、インデックスに使用します。
         /// </summary>
         private const int BytesPerPixel = 4;
 
-        /// <summary>
-        /// Resource loader for string resources
-        /// </summary>
+    
 #if WIN81ORLATER
         private ResourceLoader resourceLoader = ResourceLoader.GetForCurrentView("Resources");
 #else
@@ -73,83 +66,84 @@ namespace Microsoft.Samples.Kinect.InfraredBasics
 #endif
 
         /// <summary>
-        /// Active Kinect sensor
+        /// Kinect センサー本体を扱うためのフィールドです。
         /// </summary>
         private KinectSensor kinectSensor = null;
 
         /// <summary>
-        /// Reader for infrared frames
+        /// 赤外線センサーから届くフレームを扱うためのフィールドです。
         /// </summary>
         private InfraredFrameReader infraredFrameReader = null;
 
         /// <summary>
-        /// Bitmap to display
+        /// ビットマップ形式のデータを画面上に表示させるためのフィールドです。
         /// </summary>
         private WriteableBitmap bitmap = null;
 
         /// <summary>
-        /// Intermediate storage for receiving frame data from the sensor
+        /// センサーからのフレームデータを受け取るための中間ストレージとして機能するフィールドです。
         /// </summary>
         private ushort[] infraredFrameData = null;
 
         /// <summary>
-        /// Intermediate storage for frame data converted to color
+        /// フレームデータ用の中間サーバーのデータをカラーに変換するためのフィールドです。
         /// </summary>
         private byte[] infraredPixels = null;
 
         /// <summary>
-        /// Current status text to display
+        /// アプリが適切に動作しているものかを表示するための情報を扱います。
         /// </summary>
         private string statusText = null;
 
         /// <summary>
-        /// Initializes a new instance of the MainPage class.
+        /// MainPage クラスです。
         /// </summary>
         public MainPage()
         {
-            // get the kinectSensor object
+            // Kinect センサーのオブジェクトを取得します。
             this.kinectSensor = KinectSensor.GetDefault();
 
-            // get the infraredFrameDescription from the InfraredFrameSource
+            // 赤外線フレームに関する情報が格納されたオブジェクトを取得します。
             FrameDescription infraredFrameDescription = this.kinectSensor.InfraredFrameSource.FrameDescription;
 
-            // open the reader for the infrared frames
+            // 赤外線フレームを読み込むための Reader を開きます。
             this.infraredFrameReader = this.kinectSensor.InfraredFrameSource.OpenReader();
 
-            // wire handler for frame arrival
+            // フレームが到着したことを示すイベント "FrameArrived" が発生した際に
             this.infraredFrameReader.FrameArrived += this.Reader_InfraredFrameArrived;
 
-            // allocate space to put the pixels being received and converted
+            // 512 × 424 サイズの配列を定義します。
             this.infraredFrameData = new ushort[infraredFrameDescription.Width * infraredFrameDescription.Height];
             this.infraredPixels = new byte[infraredFrameDescription.Width * infraredFrameDescription.Height * BytesPerPixel];
 
-            // create the bitmap to display
+            // ディスプレイに表示するための ビットマップデータを出力します。
             this.bitmap = new WriteableBitmap(infraredFrameDescription.Width, infraredFrameDescription.Height);
 
-            // set IsAvailableChanged event notifier
+            // Kinect センサーについて (USB 接続が切れてしまった等) 変化した場合に
+            // "Sensor_IsAvailableChanged" の処理が実行されるようにイベントハンドラを登録します。
             this.kinectSensor.IsAvailableChanged += this.Sensor_IsAvailableChanged;
 
-            // open the sensor
+            // Kinect Sensor の処理を開始します。
             this.kinectSensor.Open();
 
-            // set the status text
+            // Kinect センサーが適切に動作しているものかを表示します。(アプリの画面左下に表示されます。)
             this.StatusText = this.kinectSensor.IsAvailable ? resourceLoader.GetString("RunningStatusText")
                                                             : resourceLoader.GetString("NoSensorStatusText");
 
-            // use the window object as the view model in this simple example
+            // View Model として、扱えるように DataContext に MainPage クラスを指定します。
             this.DataContext = this;
 
-            // initialize the components (controls) of the window
+            // アプリの起動に必要な初期化処理を実行します。
             this.InitializeComponent();
         }
 
         /// <summary>
-        /// INotifyPropertyChangedPropertyChanged event to allow window controls to bind to changeable data.
+        /// INotifyPropertyChangedPropertyChanged を用いて、プロパティの変更を画面コントロールに通知します。 
         /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
         /// <summary>
-        /// Gets or sets the current status text to display
+        /// 現在の Kinect センサーの状態を表示するためのプロパティです。
         /// </summary>
         public string StatusText
         {
@@ -164,7 +158,7 @@ namespace Microsoft.Samples.Kinect.InfraredBasics
                 {
                     this.statusText = value;
 
-                    // notify any bound elements that the text has changed
+                    // 値が変化したタイミングで、PropertyChanged イベントを呼び、変更をビューに伝えます。
                     if (this.PropertyChanged != null)
                     {
                         this.PropertyChanged(this, new PropertyChangedEventArgs("StatusText"));
@@ -174,7 +168,7 @@ namespace Microsoft.Samples.Kinect.InfraredBasics
         }
 
         /// <summary>
-        /// Execute shutdown tasks.
+        ///  MainPage のシャットダウンの処理です。
         /// </summary>
         /// <param name="sender">object sending the event</param>
         /// <param name="e">event arguments</param>
@@ -182,20 +176,21 @@ namespace Microsoft.Samples.Kinect.InfraredBasics
         {
             if (this.infraredFrameReader != null)
             {
-                // InfraredFrameReder is IDisposable
+                // InfraredFrameReder オブジェクトを解放します。
                 this.infraredFrameReader.Dispose();
                 this.infraredFrameReader = null;
             }
 
             if (this.kinectSensor != null)
             {
+                // Kinect センサーの処理を終了します。
                 this.kinectSensor.Close();
                 this.kinectSensor = null;
             }
         }
 
         /// <summary>
-        /// Handles the infrared frame data arriving from the sensor.
+        /// 赤外線センサーからフレームが到着した際に呼びされるイベントハンドラーです。
         /// </summary>
         /// <param name="sender">object sending the event</param>
         /// <param name="e">event arguments</param>
@@ -203,58 +198,65 @@ namespace Microsoft.Samples.Kinect.InfraredBasics
         {
             bool infraredFrameProcessed = false;
 
-            // InfraredFrame is IDisposable
+            
             using (InfraredFrame infraredFrame = e.FrameReference.AcquireFrame())
             {
+                //赤外線フレームが存在するか場合処理を継続します。
                 if (infraredFrame != null)
                 {
+                    //赤外線のフレームに関する情報を含んだオブジェクトを取得します。
                     FrameDescription infraredFrameDescription = infraredFrame.FrameDescription;
 
-                    // verify data and write the new infrared frame data to the display bitmap
+                    //infraredFrameDescription が持っている縦横のサイズと到着した赤外線フレームの縦横サイズを比較検証し、
+                    //一致していれば次に進みます。
                     if (((infraredFrameDescription.Width * infraredFrameDescription.Height) == this.infraredFrameData.Length) &&
                         (infraredFrameDescription.Width == this.bitmap.PixelWidth) && (infraredFrameDescription.Height == this.bitmap.PixelHeight))
                     {
-                        // Copy the pixel data from the image to a temporary array
+                        // フレームデータの情報を配列にコピーします。
                         infraredFrame.CopyFrameDataToArray(this.infraredFrameData);
-
                         infraredFrameProcessed = true;
                     }
                 }
             }
 
-            // we got a frame, convert and render
+            // 赤外線データを元に描画処理を実行します。
             if (infraredFrameProcessed)
             {
+                //赤外線データを、RGB 値に変換します。
                 this.ConvertInfraredData();
+
+                //変換したデータを画面に描画します。
                 this.RenderInfraredPixels(this.infraredPixels);
             }
         }
 
         /// <summary>
-        /// Convert infrared to RGB.
+        /// フレーム内の赤外線情報を RGB 値に変換します。
         /// </summary>
         private void ConvertInfraredData()
         {
-            // Convert the infrared to RGB
+
             int colorPixelIndex = 0;
             for (int i = 0; i < this.infraredFrameData.Length; ++i)
             {
-                // normalize the incoming infrared data (ushort) to a float ranging from 
-                // [InfraredOutputValueMinimum, InfraredOutputValueMaximum] by
-                // 1. dividing the incoming value by the source maximum value
+                // 到着した赤外線データを、ピクセル毎に [InfraredOutputValueMinimum, InfraredOutputValueMaximum] 
+                // 範囲で指定した範囲に収まるように正規化します。
+                // 正規化の手順は、5 つのステップで実行されます。
+
+                // 手順1. infraredFrameData[i] （各ピクセルの輝度が入っている） を、輝度の上限で割ります。
+                // 該当のピクセルの輝度の上限に対する割合が得られます。
                 float intensityRatio = (float)this.infraredFrameData[i] / InfraredSourceValueMaximum;
 
-                // 2. dividing by the (average scene value * standard deviations)
+                // 手順2. 右の式を計算します。 (1 で求めた比率) / (輝度の平均値 * 標準偏差) 
                 intensityRatio /= InfraredSceneValueAverage * InfraredSceneStandardDeviations;
 
-                // 3. limiting the value to InfraredOutputValueMaximum
+                // 手順3. 2 で求めた値が、InfraredOutputValueMaximum より大きくなっていないか確認します。
                 intensityRatio = Math.Min(InfraredOutputValueMaximum, intensityRatio);
 
-                // 4. limiting the lower value InfraredOutputValueMinimym
+                // 手順4. 2 で求めた値が、InfraredOutputValueMinimum より小さくなっていないか確認します。 
                 intensityRatio = Math.Max(InfraredOutputValueMinimum, intensityRatio);
 
-                // 5. converting the normalized value to a byte and using the result
-                // as the RGB components required by the image
+                // 上記でも求めた正規化した輝度の値を、RGB 値に変換します。
                 byte intensity = (byte)(intensityRatio * 255.0f);
                 this.infraredPixels[colorPixelIndex++] = intensity;
                 this.infraredPixels[colorPixelIndex++] = intensity;
@@ -264,7 +266,7 @@ namespace Microsoft.Samples.Kinect.InfraredBasics
         }
 
         /// <summary>
-        /// Renders color pixels into the writeableBitmap.
+        /// 画面への描画処理を実行します。
         /// </summary>
         /// <param name="pixels">pixel data</param>
         private void RenderInfraredPixels(byte[] pixels)
@@ -275,13 +277,12 @@ namespace Microsoft.Samples.Kinect.InfraredBasics
         }
 
         /// <summary>
-        /// Handles the event which the sensor becomes unavailable (E.g. paused, closed, unplugged).
+        ///  Kinect センサーの状態が変わったときに呼び出されます。
         /// </summary>
         /// <param name="sender">object sending the event</param>
         /// <param name="e">event arguments</param>
         private void Sensor_IsAvailableChanged(object sender, IsAvailableChangedEventArgs e)
         {
-            // on failure, set the status text
             this.StatusText = this.kinectSensor.IsAvailable ? resourceLoader.GetString("RunningStatusText")
                                                             : resourceLoader.GetString("SensorNotAvailableStatusText");
         }

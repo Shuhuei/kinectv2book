@@ -1,0 +1,2 @@
+C:\Users\Shuhei\Desktop\kinectv2book\HDFaceBasics-XAML_CS\HDFaceBasics-XAML_CS.csproj;x86
+C:\Users\Shuhei\Desktop\kinectv2book\HDFaceBasics-XAML_CS\HDFaceVisualizer\HDFaceVisualizer.vcxproj;x86

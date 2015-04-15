@@ -1,0 +1,26 @@
+﻿Build started 2015/04/04 21:44:36.
+     1>Project "C:\Users\Shuhei\Desktop\kinectv2book\HDFaceBasics-XAML_CS\HDFaceVisualizer\HDFaceVisualizer.vcxproj" on node 2 (Build target(s)).
+     1>FxCompile:
+         C:\Program Files (x86)\Windows Kits\8.1\bin\x86\fxc.exe /nologo /E"main" /T ps_4_0_level_9_1 /Fo "C:\Users\Shuhei\Desktop\kinectv2book\HDFaceBasics-XAML_CS\Debug\HDFaceVisualizer\HDFacePixelShader.cso" /Od /Zi HDFacePixelShader.hlsl 
+         compilation object save succeeded; see C:\Users\Shuhei\Desktop\kinectv2book\HDFaceBasics-XAML_CS\Debug\HDFaceVisualizer\HDFacePixelShader.cso
+         C:\Program Files (x86)\Windows Kits\8.1\bin\x86\fxc.exe /nologo /E"main" /T vs_4_0_level_9_1 /Fo "C:\Users\Shuhei\Desktop\kinectv2book\HDFaceBasics-XAML_CS\Debug\HDFaceVisualizer\HDFaceVertexShader.cso" /Od /Zi HDFaceVertexShader.hlsl 
+         compilation object save succeeded; see C:\Users\Shuhei\Desktop\kinectv2book\HDFaceBasics-XAML_CS\Debug\HDFaceVisualizer\HDFaceVertexShader.cso
+       ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /I"C:\Users\Shuhei\Desktop\kinectv2book\HDFaceBasics-XAML_CS\HDFaceVisualizer\\" /I"Generated Files\\" /IDebug\ /ZI /ZW /ZW:nostdlib /nologo /W3 /WX- /sdl /MP /Od /Oy- /D _WINRT_DLL /D _WINDLL /D _UNICODE /D UNICODE /D _DEBUG /D WINAPI_FAMILY=WINAPI_FAMILY_APP /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yc"pch.h" /Fp"Debug\pch.pch" /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /FU"C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1\ExtensionSDKs\Microsoft.VCLibs\12.0\References\CommonConfiguration\neutral\platform.winmd" /FU"C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1\ExtensionSDKs\WindowsPreview.Kinect\2.0\References\CommonConfiguration\neutral\WindowsPreview.Data.winmd" /FU"C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1\ExtensionSDKs\WindowsPreview.Kinect\2.0\References\CommonConfiguration\neutral\WindowsPreview.Kinect.winmd" /FU"C:\Program Files (x86)\Windows Kits\8.1\References\CommonConfiguration\Neutral\Windows.winmd" /FU"C:\Program Files (x86)\Windows Kits\8.1\References\CommonConfiguration\Neutral\Windows.winmd" /analyze- /errorReport:prompt /bigobj pch.cpp
+         pch.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /I"C:\Users\Shuhei\Desktop\kinectv2book\HDFaceBasics-XAML_CS\HDFaceVisualizer\\" /I"Generated Files\\" /IDebug\ /ZI /ZW /ZW:nostdlib /nologo /W3 /WX- /sdl /MP /Od /Oy- /D _WINRT_DLL /D _WINDLL /D _UNICODE /D UNICODE /D _DEBUG /D WINAPI_FAMILY=WINAPI_FAMILY_APP /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yu"pch.h" /Fp"Debug\pch.pch" /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /FU"C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1\ExtensionSDKs\Microsoft.VCLibs\12.0\References\CommonConfiguration\neutral\platform.winmd" /FU"C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1\ExtensionSDKs\WindowsPreview.Kinect\2.0\References\CommonConfiguration\neutral\WindowsPreview.Data.winmd" /FU"C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1\ExtensionSDKs\WindowsPreview.Kinect\2.0\References\CommonConfiguration\neutral\WindowsPreview.Kinect.winmd" /FU"C:\Program Files (x86)\Windows Kits\8.1\References\CommonConfiguration\Neutral\Windows.winmd" /FU"C:\Program Files (x86)\Windows Kits\8.1\References\CommonConfiguration\Neutral\Windows.winmd" /analyze- /errorReport:prompt /bigobj DirectXPanelBase.cpp HDFaceD3DPanel.cpp
+         DirectXPanelBase.cpp
+         HDFaceD3DPanel.cpp
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Shuhei\Desktop\kinectv2book\HDFaceBasics-XAML_CS\Debug\HDFaceVisualizer\HDFaceXAMLVisualizer.dll" /INCREMENTAL /NOLOGO d3d11.lib dxgi.lib d2d1.lib runtimeobject.lib kernel32.lib /MANIFEST:NO /DEBUG /PDB:"C:\Users\Shuhei\Desktop\kinectv2book\HDFaceBasics-XAML_CS\Debug\HDFaceVisualizer\HDFaceXAMLVisualizer.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /APPCONTAINER /WINMD /WINMDFILE:"C:\Users\Shuhei\Desktop\kinectv2book\HDFaceBasics-XAML_CS\Debug\HDFaceVisualizer\HDFaceVisualizer.winmd" /DYNAMICBASE /NXCOMPAT /MACHINE:X86 /DLL Debug\DirectXPanelBase.obj
+         Debug\HDFaceD3DPanel.obj
+         Debug\pch.obj
+            Creating library C:\Users\Shuhei\Desktop\kinectv2book\HDFaceBasics-XAML_CS\Debug\HDFaceVisualizer\HDFaceXAMLVisualizer.lib and object C:\Users\Shuhei\Desktop\kinectv2book\HDFaceBasics-XAML_CS\Debug\HDFaceVisualizer\HDFaceXAMLVisualizer.exp
+         HDFaceVisualizer.vcxproj -> C:\Users\Shuhei\Desktop\kinectv2book\HDFaceBasics-XAML_CS\Debug\HDFaceVisualizer\HDFaceXAMLVisualizer.dll
+       _GenerateProjectPriFileCore:
+         C:\Program Files (x86)\Windows Kits\8.1\bin\x64\MakePri.exe New -ProjectRoot C:\Users\Shuhei\Desktop\kinectv2book\HDFaceBasics-XAML_CS\HDFaceVisualizer\ -ConfigXml Debug\priconfig.xml -OutputFile C:\Users\Shuhei\Desktop\kinectv2book\HDFaceBasics-XAML_CS\Debug\HDFaceVisualizer\HDFaceVisualizer.pri -IndexName HDFaceVisualizer -Verbose -Overwrite  
+     1>Done Building Project "C:\Users\Shuhei\Desktop\kinectv2book\HDFaceBasics-XAML_CS\HDFaceVisualizer\HDFaceVisualizer.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:07.39
